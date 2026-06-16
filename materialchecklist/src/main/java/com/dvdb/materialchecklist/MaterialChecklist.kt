@@ -254,10 +254,17 @@ class MaterialChecklist(
      * plain editor surface.
      */
     @CheckResult
-    fun performChecklistMenuAction(action: ChecklistMenuAction): ChecklistMenuActionResult {
+    fun performChecklistMenuAction(
+        action: ChecklistMenuAction,
+        keepCheckboxSymbols: Boolean = true,
+        keepCheckedItems: Boolean = true
+    ): ChecklistMenuActionResult {
         return when (action) {
             ChecklistMenuAction.CONVERT_TO_TEXT -> ChecklistMenuActionResult(
-                formattedText = getItems()
+                formattedText = getItems(
+                    keepCheckboxSymbols = keepCheckboxSymbols,
+                    keepCheckedItems = keepCheckedItems
+                )
             )
             ChecklistMenuAction.REMOVE_CHECKED_ITEMS -> {
                 val removedIds = removeAllCheckedItems()

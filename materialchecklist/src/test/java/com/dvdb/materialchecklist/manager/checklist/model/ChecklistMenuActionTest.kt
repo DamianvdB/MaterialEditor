@@ -51,4 +51,13 @@ class ChecklistMenuActionTest {
 
         Assertions.assertNull(actual)
     }
+
+    @Test
+    fun result_defaultsToNoChange_test() {
+        val actual = ChecklistMenuActionResult()
+
+        Assertions.assertNull(actual.formattedText)
+        Assertions.assertTrue(actual.removedItemIds.isEmpty())
+        Assertions.assertFalse(actual.changed)
+    }
 }

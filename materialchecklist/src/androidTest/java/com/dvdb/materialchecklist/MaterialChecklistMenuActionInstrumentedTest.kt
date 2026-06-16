@@ -68,4 +68,21 @@ class MaterialChecklistMenuActionInstrumentedTest : MaterialChecklistInstrumente
             assertFalse(result.changed)
         }
     }
+
+    @Test
+    fun convertToTextMenuActionUsesFormattingOptions() {
+        scenarioRule.scenario.onActivity { activity ->
+            val checklist = activity.checklist
+            checklist.setItems("[ ] Alpha\n[x] Done")
+
+            val result = checklist.performChecklistMenuAction(
+                action = ChecklistMenuAction.CONVERT_TO_TEXT,
+                keepCheckboxSymbols = false,
+                keepCheckedItems = false
+            )
+
+            assertEquals("Alpha\n", result.formattedText)
+            assertFalse(result.changed)
+        }
+    }
 }
