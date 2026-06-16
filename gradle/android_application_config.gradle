@@ -13,8 +13,7 @@ android {
         release {
             minifyEnabled = true
             shrinkResources = true
-            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'),
-                    'proguard-glide.pro'
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt')
         }
         debug {
             applicationIdSuffix = ".debug"

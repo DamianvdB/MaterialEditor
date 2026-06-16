@@ -1,7 +1,7 @@
 apply from: rootProject.file("dependencies.gradle")
 
 android {
-    compileSdkVersion versions.compile_sdk
+    compileSdk = versions.compile_sdk
 
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_21
@@ -9,8 +9,8 @@ android {
     }
 
     defaultConfig {
-        minSdkVersion versions.min_sdk
-        targetSdkVersion versions.compile_sdk
+        minSdk = versions.min_sdk
+        targetSdk = versions.target_sdk
         versionCode versions.publish_version_code
         versionName versions.publish_version
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"

@@ -17,10 +17,12 @@
 package com.dvdb.materialchecklist
 
 import android.app.Activity
+import android.net.Uri
 import android.os.Bundle
 import android.view.View
 import android.view.ViewGroup
 import android.widget.CheckBox
+import android.widget.ImageView
 import android.widget.TextView
 import androidx.test.ext.junit.rules.ActivityScenarioRule
 import androidx.test.ext.junit.runners.AndroidJUnit4
@@ -151,6 +153,58 @@ class MaterialChecklistInstrumentedTest {
         }
     }
 
+    @Test
+    fun imageItemLoadsPrimaryImageUriDrawable() {
+        scenarioRule.scenario.onActivity { activity ->
+            activity.checklist.setEditorItems(
+                listOf(
+                    ImageItemContainer(
+                        id = 1,
+                        items = listOf(
+                            ImageItem(
+                                id = 22,
+                                primaryImageUri = activity.drawableResourceUri(R.drawable.ic_add)
+                            )
+                        )
+                    )
+                )
+            )
+        }
+        waitForIdle()
+
+        scenarioRule.scenario.onActivity { activity ->
+            val primaryImage = activity.requireViewById<ImageView>(R.id.item_image_primary_image)
+            assertEquals(View.VISIBLE, primaryImage.visibility)
+            assertTrue(primaryImage.drawable != null)
+        }
+    }
+
+    @Test
+    fun imageItemLoadsSecondaryImageUriDrawable() {
+        scenarioRule.scenario.onActivity { activity ->
+            activity.checklist.setEditorItems(
+                listOf(
+                    ImageItemContainer(
+                        id = 1,
+                        items = listOf(
+                            ImageItem(
+                                id = 23,
+                                secondaryImageUri = activity.drawableResourceUri(R.drawable.ic_close)
+                            )
+                        )
+                    )
+                )
+            )
+        }
+        waitForIdle()
+
+        scenarioRule.scenario.onActivity { activity ->
+            val secondaryImage = activity.requireViewById<ImageView>(R.id.item_image_secondary_image)
+            assertEquals(View.VISIBLE, secondaryImage.visibility)
+            assertTrue(secondaryImage.drawable != null)
+        }
+    }
+
     private fun waitForIdle() {
         InstrumentationRegistry.getInstrumentation().waitForIdleSync()
     }
@@ -172,6 +226,9 @@ class MaterialChecklistTestActivity : Activity() {
         )
     }
 }
+
+private fun Activity.drawableResourceUri(drawableId: Int): Uri =
+    Uri.parse("android.resource://$packageName/$drawableId")
 
 private inline fun <reified T : View> Activity.requireViewById(id: Int): T =
     findViewById<View>(id) as? T ?: error("Required view with id $id was not found")

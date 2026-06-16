@@ -78,6 +78,23 @@ internal class ImageRecyclerItemTest {
         )
     }
 
+    @Test
+    fun blankItem_hidesTextAndAttachmentActions_test() {
+        val item = imageRecyclerItem()
+
+        Assertions.assertFalse(item.shouldShowText)
+        Assertions.assertFalse(item.shouldShowAttachmentActions)
+        Assertions.assertFalse(item.shouldShowAttachmentMetadata)
+    }
+
+    @Test
+    fun attachmentActionLabelShowsActionsWithoutMetadataText_test() {
+        val item = imageRecyclerItem(attachmentActionLabel = "Preview")
+
+        Assertions.assertTrue(item.shouldShowAttachmentActions)
+        Assertions.assertFalse(item.shouldShowAttachmentMetadata)
+    }
+
     private fun imageRecyclerItem(
         text: String = "",
         attachmentMimeType: String = "",

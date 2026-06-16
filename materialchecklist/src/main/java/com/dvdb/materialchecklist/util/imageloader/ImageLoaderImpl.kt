@@ -21,12 +21,11 @@ import android.graphics.drawable.ColorDrawable
 import android.graphics.drawable.Drawable
 import android.net.Uri
 import android.widget.ImageView
-import com.bumptech.glide.Glide
-import com.bumptech.glide.load.DataSource
-import com.bumptech.glide.load.engine.GlideException
-import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions
-import com.bumptech.glide.request.RequestListener
-import com.bumptech.glide.request.target.Target
+import coil3.load
+import coil3.request.crossfade
+import coil3.request.error
+import coil3.request.placeholder
+import coil3.size.Scale
 
 internal object ImageLoader {
 
@@ -36,33 +35,16 @@ internal object ImageLoader {
         onLoadSuccess: (Drawable?) -> Unit = {},
         onLoadFailed: () -> Unit = {}
     ) {
-        Glide.with(target.context)
-            .load(uri)
-            .placeholder(ColorDrawable(Color.TRANSPARENT))
-            .transition(DrawableTransitionOptions.withCrossFade())
-            .centerCrop()
-            .listener(object : RequestListener<Drawable> {
-                override fun onLoadFailed(
-                    e: GlideException?,
-                    model: Any?,
-                    target: Target<Drawable>?,
-                    isFirstResource: Boolean
-                ): Boolean {
-                    onLoadFailed()
-                    return false
-                }
-
-                override fun onResourceReady(
-                    resource: Drawable?,
-                    model: Any?,
-                    target: Target<Drawable>?,
-                    dataSource: DataSource?,
-                    isFirstResource: Boolean
-                ): Boolean {
-                    onLoadSuccess(resource)
-                    return false
-                }
-            })
-            .into(target)
+        target.scaleType = ImageView.ScaleType.CENTER_CROP
+        target.load(uri) {
+            placeholder(ColorDrawable(Color.TRANSPARENT))
+            error(ColorDrawable(Color.TRANSPARENT))
+            crossfade(true)
+            scale(Scale.FILL)
+            listener(
+                onSuccess = { _, _ -> onLoadSuccess(target.drawable) },
+                onError = { _, _ -> onLoadFailed() }
+            )
+        }
     }
 }
