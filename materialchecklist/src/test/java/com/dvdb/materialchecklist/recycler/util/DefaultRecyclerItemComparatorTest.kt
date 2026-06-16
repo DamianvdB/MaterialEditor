@@ -156,6 +156,23 @@ internal class DefaultRecyclerItemComparatorTest {
     }
 
     @Test
+    fun newChecklistItemIsSortedAtUncheckedCheckedBoundaryTest() {
+        val inputItems = listOf(
+            ChecklistRecyclerItem("Done", true),
+            ChecklistRecyclerItem("Alpha", false),
+            ChecklistNewRecyclerItem()
+        )
+        val expectedItems = listOf(
+            ChecklistRecyclerItem("Alpha", false),
+            ChecklistNewRecyclerItem(),
+            ChecklistRecyclerItem("Done", true)
+        ).resetIds()
+        val actualItems = inputItems.sortedWith(DefaultRecyclerItemComparator).resetIds()
+
+        Assertions.assertEquals(expectedItems, actualItems)
+    }
+
+    @Test
     fun checkedItemsAndUncheckedItemsAndNewItemsTest() {
         val inputItems = listOf(
             ChecklistNewRecyclerItem(),
