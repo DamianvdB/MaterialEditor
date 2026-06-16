@@ -33,18 +33,23 @@ import com.dvdb.materialchecklist.recycler.imagecontainer.image.model.ImageRecyc
 import com.dvdb.materialchecklist.recycler.imagecontainer.image.model.ImageRecyclerItem
 import com.dvdb.materialchecklist.util.loadImage
 import com.dvdb.materialchecklist.util.setVisible
-import kotlinx.android.synthetic.main.item_image.view.*
 
 internal class ImageRecyclerHolder private constructor(
     itemView: View,
     private var config: ImageRecyclerHolderConfig,
     private val onItemClicked: (position: Int) -> Unit,
+    private val onItemShareClicked: (position: Int) -> Unit,
+    private val onItemRemoveClicked: (position: Int) -> Unit,
     private val onItemLongClicked: (position: Int) -> Boolean
 ) : RecyclerView.ViewHolder(itemView) {
 
-    private val primaryImage: ImageView = itemView.item_image_primary_image
-    private val secondaryImage: ImageView = itemView.item_image_secondary_image
-    private val text: TextView = itemView.item_image_text
+    private val primaryImage: ImageView = itemView.findViewById(R.id.item_image_primary_image)
+    private val secondaryImage: ImageView = itemView.findViewById(R.id.item_image_secondary_image)
+    private val text: TextView = itemView.findViewById(R.id.item_image_text)
+    private val metadata: TextView = itemView.findViewById(R.id.item_image_metadata)
+    private val actionOpen: TextView = itemView.findViewById(R.id.item_image_action_open)
+    private val actionShare: TextView = itemView.findViewById(R.id.item_image_action_share)
+    private val actionRemove: TextView = itemView.findViewById(R.id.item_image_action_remove)
 
     init {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
@@ -60,6 +65,8 @@ internal class ImageRecyclerHolder private constructor(
         bindText(item)
         bindPrimaryImage(item)
         bindSecondaryImage(item)
+        bindAttachmentMetadata(item)
+        bindAttachmentActions(item)
     }
 
     fun updateConfigConditionally(config: ImageRecyclerHolderConfig) {
@@ -95,21 +102,76 @@ internal class ImageRecyclerHolder private constructor(
             config.textSize
         )
         text.typeface = config.typeFace
+
+        metadata.setTextColor(config.textColor)
+        metadata.maxLines = 1
+        metadata.setTextSize(
+            TypedValue.COMPLEX_UNIT_PX,
+            config.textSize * 0.85F
+        )
+        metadata.typeface = config.typeFace
+        metadata.alpha = 0.72F
+
+        listOf(actionOpen, actionShare, actionRemove).forEach { action ->
+            action.setTextColor(config.textColor)
+            action.maxLines = 1
+            action.setTextSize(
+                TypedValue.COMPLEX_UNIT_PX,
+                config.textSize * 0.85F
+            )
+            action.typeface = config.typeFace
+            action.alpha = 0.86F
+        }
     }
 
     private fun initClickListener(itemView: View) {
         itemView.setOnClickListener {
-            onItemClicked(adapterPosition)
+            performBindingAdapterPositionAction(onItemClicked)
         }
 
         itemView.setOnLongClickListener {
-            onItemLongClicked(adapterPosition)
+            bindingAdapterPosition
+                .takeIf { it != RecyclerView.NO_POSITION }
+                ?.let(onItemLongClicked)
+                ?: false
+        }
+
+        actionOpen.setOnClickListener {
+            performBindingAdapterPositionAction(onItemClicked)
+        }
+
+        actionShare.setOnClickListener {
+            performBindingAdapterPositionAction(onItemShareClicked)
+        }
+
+        actionRemove.setOnClickListener {
+            performBindingAdapterPositionAction(onItemRemoveClicked)
         }
     }
 
     private fun bindText(item: ImageRecyclerItem) {
-        text.text = item.text
+        text.text = item.displayText
         text.setVisible(item.shouldShowText)
+    }
+
+    private fun bindAttachmentMetadata(item: ImageRecyclerItem) {
+        metadata.text = item.attachmentMetadataLabel
+        metadata.setVisible(item.shouldShowAttachmentMetadata)
+    }
+
+    private fun bindAttachmentActions(item: ImageRecyclerItem) {
+        actionOpen.text = item.openActionLabel.ifBlank {
+            itemView.context.getString(R.string.mc_item_image_action_open)
+        }
+        actionOpen.setVisible(item.shouldShowAttachmentActions)
+        actionShare.setVisible(item.shouldShowAttachmentActions)
+        actionRemove.setVisible(item.shouldShowAttachmentActions)
+    }
+
+    private fun performBindingAdapterPositionAction(action: (position: Int) -> Unit) {
+        bindingAdapterPosition
+            .takeIf { it != RecyclerView.NO_POSITION }
+            ?.let(action)
     }
 
     private fun bindPrimaryImage(item: ImageRecyclerItem) {
@@ -134,11 +196,11 @@ internal class ImageRecyclerHolder private constructor(
         isImageDrawableSet: Boolean,
         drawable: Drawable?,
         isImageUriSet: Boolean,
-        uri: Uri
+        uri: Uri?
     ) {
         if (isImageDrawableSet) {
             setImageDrawable(drawable)
-        } else if (isImageUriSet) {
+        } else if (isImageUriSet && uri != null) {
             loadImage(uri)
         }
 
@@ -150,6 +212,8 @@ internal class ImageRecyclerHolder private constructor(
 
     class Factory(
         private val onItemClicked: (position: Int) -> Unit,
+        private val onItemShareClicked: (position: Int) -> Unit,
+        private val onItemRemoveClicked: (position: Int) -> Unit,
         private val onItemLongClicked: (position: Int) -> Boolean
     ) {
         fun create(
@@ -166,6 +230,8 @@ internal class ImageRecyclerHolder private constructor(
                 itemView,
                 config,
                 onItemClicked,
+                onItemShareClicked,
+                onItemRemoveClicked,
                 onItemLongClicked
             )
         }

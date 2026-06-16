@@ -28,6 +28,8 @@ import com.dvdb.materialchecklist.config.ChecklistConfig
 import com.dvdb.materialchecklist.manager.Manager
 import com.dvdb.materialchecklist.manager.checklist.ChecklistManagerImpl
 import com.dvdb.materialchecklist.manager.checklist.model.ChecklistItem
+import com.dvdb.materialchecklist.manager.checklist.model.ChecklistMenuAction
+import com.dvdb.materialchecklist.manager.checklist.model.ChecklistMenuActionResult
 import com.dvdb.materialchecklist.manager.checklist.util.ChecklistRecyclerItemPositionTracker
 import com.dvdb.materialchecklist.manager.chip.ChipManagerImpl
 import com.dvdb.materialchecklist.manager.chip.model.ChipItem
@@ -146,6 +148,26 @@ class MaterialChecklist(
         manager.onImageItemLongClicked = onImageItemLongClicked
     }
 
+    fun setOnAttachmentItemClicked(onAttachmentItemClicked: (ImageItem) -> Unit) {
+        setOnAttachmentItemOpenClicked(onAttachmentItemClicked)
+    }
+
+    fun setOnAttachmentItemLongClicked(onAttachmentItemLongClicked: (ImageItem) -> Boolean) {
+        setOnImageItemLongClicked(onAttachmentItemLongClicked)
+    }
+
+    fun setOnAttachmentItemOpenClicked(onAttachmentItemOpenClicked: (ImageItem) -> Unit) {
+        manager.onAttachmentItemOpened = onAttachmentItemOpenClicked
+    }
+
+    fun setOnAttachmentItemShareClicked(onAttachmentItemShareClicked: (ImageItem) -> Unit) {
+        manager.onAttachmentItemShared = onAttachmentItemShareClicked
+    }
+
+    fun setOnAttachmentItemRemoveClicked(onAttachmentItemRemoveClicked: (ImageItem) -> Unit) {
+        manager.onAttachmentItemRemoved = onAttachmentItemRemoveClicked
+    }
+
     /**
      * Set the list of checklist items by parsing the [formattedText] string.
      *
@@ -222,6 +244,30 @@ class MaterialChecklist(
      */
     fun uncheckAllCheckedItems(): Boolean {
         return manager.uncheckAllCheckedItems()
+    }
+
+    /**
+     * Perform a D Notes-style checklist overflow action.
+     *
+     * Conversion to checklist is intentionally kept by [setItems] because the caller owns the
+     * plain-text source. Conversion to text returns the formatted text to render in the caller's
+     * plain editor surface.
+     */
+    @CheckResult
+    fun performChecklistMenuAction(action: ChecklistMenuAction): ChecklistMenuActionResult {
+        return when (action) {
+            ChecklistMenuAction.CONVERT_TO_TEXT -> ChecklistMenuActionResult(
+                formattedText = getItems()
+            )
+            ChecklistMenuAction.REMOVE_CHECKED_ITEMS -> {
+                val removedIds = removeAllCheckedItems()
+                ChecklistMenuActionResult(
+                    removedItemIds = removedIds,
+                    changed = removedIds.isNotEmpty()
+                )
+            }
+            ChecklistMenuAction.UNCHECK_CHECKED_ITEMS -> ChecklistMenuActionResult(changed = uncheckAllCheckedItems())
+        }
     }
 
     /**
@@ -327,10 +373,16 @@ class MaterialChecklist(
                 }
             ),
             itemImageContainerRecyclerHolderFactory = ImageContainerRecyclerHolder.Factory(
-                { item ->
-                    manager.onImageItemInContainerClicked(item)
+                onItemOpened = { item ->
+                    manager.onAttachmentItemInContainerOpened(item)
                 },
-                { item ->
+                onItemShared = { item ->
+                    manager.onAttachmentItemInContainerShared(item)
+                },
+                onItemRemoved = { item ->
+                    manager.onAttachmentItemInContainerRemoved(item)
+                },
+                onItemLongClicked = { item ->
                     manager.onImageItemInContainerLongClicked(item)
                 }
             ),

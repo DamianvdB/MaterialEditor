@@ -33,6 +33,7 @@ import android.view.Menu
 import android.view.MenuItem
 import android.view.View
 import android.view.inputmethod.InputMethodManager
+import android.widget.EditText
 import android.widget.Toast
 import androidx.annotation.DrawableRes
 import androidx.appcompat.app.AppCompatActivity
@@ -42,6 +43,7 @@ import androidx.preference.PreferenceManager
 import com.dvdb.checklist.R
 import com.dvdb.checklist.sample.config.ChecklistConfiguration
 import com.dvdb.materialchecklist.config.checklist.*
+import com.dvdb.materialchecklist.config.checklist.model.BehaviorCheckedItem
 import com.dvdb.materialchecklist.config.chip.*
 import com.dvdb.materialchecklist.config.content.setContentClickableLinks
 import com.dvdb.materialchecklist.config.content.setContentHint
@@ -52,11 +54,12 @@ import com.dvdb.materialchecklist.config.general.setTextEditable
 import com.dvdb.materialchecklist.config.image.*
 import com.dvdb.materialchecklist.config.title.*
 import com.dvdb.materialchecklist.manager.chip.model.ChipItem
+import com.dvdb.materialchecklist.MaterialChecklist
 import com.dvdb.materialchecklist.manager.image.model.ImageItem
 import com.dvdb.materialchecklist.manager.model.*
 import com.dvdb.materialchecklist.util.exhaustive
 import com.google.android.material.snackbar.Snackbar
-import kotlinx.android.synthetic.main.activity_main.*
+import com.dvdb.materialchecklist.R as MaterialChecklistR
 
 private const val SETTINGS_ACTIVITY_REQUEST_CODE = 1000
 
@@ -118,6 +121,10 @@ internal class MainActivity : AppCompatActivity() {
     private lateinit var convertToChecklistMenuItem: MenuItem
     private lateinit var removeCheckedItemsMenuItem: MenuItem
     private lateinit var uncheckCheckedItemsMenuItem: MenuItem
+    private lateinit var toggleDeleteCheckedItemsMenuItem: MenuItem
+    private lateinit var mainRoot: View
+    private lateinit var mainChecklist: MaterialChecklist
+    private lateinit var mainText: EditText
 
     @SuppressLint("ShowToast")
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -149,6 +156,12 @@ internal class MainActivity : AppCompatActivity() {
                 isVisible = showNoteEditor
             }
 
+        toggleDeleteCheckedItemsMenuItem =
+            menu.findItem(R.id.menu_main_activity_toggle_delete_checked_items).apply {
+                isVisible = showNoteEditor
+                updateDeleteCheckedItemsMenuState(checklistConfiguration.behaviorCheckedItem)
+            }
+
         convertToChecklistMenuItem =
             menu.findItem(R.id.menu_main_activity_convert_to_checklist).apply {
                 isVisible = !showNoteEditor
@@ -163,6 +176,7 @@ internal class MainActivity : AppCompatActivity() {
             R.id.menu_main_activity_convert_to_checklist -> handleOnConvertToChecklistMenuItemClicked()
             R.id.menu_main_activity_remove_checked_items -> handleOnRemoveCheckedItemsMenuItemClicked()
             R.id.menu_main_activity_uncheck_checked_items -> handleOnUncheckCheckedItemsMenuItemClicked()
+            R.id.menu_main_activity_toggle_delete_checked_items -> handleOnToggleDeleteCheckedItemsMenuItemClicked()
             R.id.menu_main_activity_d_notes -> handleOnDNotesMenuItemClicked()
             R.id.menu_main_activity_github -> handleOnGithubMenuItemClicked()
             R.id.menu_main_activity_settings -> handleOnSettingsMenuItemClicked()
@@ -181,7 +195,7 @@ internal class MainActivity : AppCompatActivity() {
 
     override fun onStop() {
         if (showNoteEditor) {
-            val items = main_checklist.getEditorItems()
+            val items = mainChecklist.getEditorItems()
 
             items.forEach { item ->
                 when (item) {
@@ -200,13 +214,17 @@ internal class MainActivity : AppCompatActivity() {
                 }.exhaustive
             }
         } else {
-            checklistItemsText = main_text.text.toString()
+            checklistItemsText = mainText.text.toString()
         }
 
         super.onStop()
     }
 
     private fun initView() {
+        mainRoot = findViewById(R.id.main_root)
+        mainChecklist = findViewById(R.id.main_checklist)
+        mainText = findViewById(R.id.main_text)
+
         initChecklist()
         initChips()
         initImages()
@@ -214,33 +232,33 @@ internal class MainActivity : AppCompatActivity() {
         if (showNoteEditor) {
             setItems()
         } else {
-            main_text.setText(checklistItemsText)
+            mainText.setText(checklistItemsText)
 
-            main_text.visibility = View.VISIBLE
-            main_checklist.visibility = View.GONE
+            mainText.visibility = View.VISIBLE
+            mainChecklist.visibility = View.GONE
         }
 
         handleSettingConfiguration()
     }
 
     private fun initChecklist() {
-        main_checklist.setOnItemDeletedListener { text, id ->
+        mainChecklist.setOnItemDeletedListener { text, id ->
             val message: String =
                 if (text.isNotEmpty()) "Checklist item deleted: \"$text\"" else "Checklist item deleted"
-            Snackbar.make(main_root, message, Snackbar.LENGTH_LONG)
+            Snackbar.make(mainRoot, message, Snackbar.LENGTH_LONG)
                 .setAction("undo") {
-                    main_checklist.restoreDeletedItem(id)
+                    mainChecklist.restoreDeletedItem(id)
                 }.show()
         }
     }
 
     private fun initChips() {
-        main_checklist.setOnChipItemClicked {
+        mainChecklist.setOnChipItemClicked {
             toast.setText("Chip item clicked with text '${it.text}'")
             toast.show()
         }
 
-        main_checklist.setOnChipItemLongClicked {
+        mainChecklist.setOnChipItemLongClicked {
             toast.setText("Chip item long clicked with text '${it.text}'")
             toast.show()
             true
@@ -248,12 +266,12 @@ internal class MainActivity : AppCompatActivity() {
     }
 
     private fun initImages() {
-        main_checklist.setOnImageItemClicked {
+        mainChecklist.setOnImageItemClicked {
             toast.setText("Image clicked with id '${it.id}'")
             toast.show()
         }
 
-        main_checklist.setOnImageItemLongClicked {
+        mainChecklist.setOnImageItemLongClicked {
             toast.setText("Image long clicked with id '${it.id}'")
             toast.show()
             true
@@ -261,7 +279,7 @@ internal class MainActivity : AppCompatActivity() {
     }
 
     private fun setItems() {
-        main_checklist.setEditorItems(
+        mainChecklist.setEditorItems(
             listOf(
                 ImageItemContainer(
                     1,
@@ -310,8 +328,13 @@ internal class MainActivity : AppCompatActivity() {
         return listOf(
             ImageItem(
                 id = 1,
-                text = "Hello Word 1",
-                primaryImage = ContextCompat.getDrawable(this, R.drawable.ic_add).apply {
+                text = "Holiday booking",
+                attachmentDisplayName = "Holiday booking.pdf",
+                attachmentMimeType = "application/pdf",
+                attachmentSizeLabel = "128 KB",
+                attachmentDateLabel = "Today",
+                attachmentActionLabel = "Open",
+                primaryImage = ContextCompat.getDrawable(this, MaterialChecklistR.drawable.ic_add).apply {
                     this!!.mutate()
 
                     DrawableCompat.setTintList(this, null)
@@ -325,7 +348,12 @@ internal class MainActivity : AppCompatActivity() {
             ),
             ImageItem(
                 id = 2,
-                text = "Hello Word 2",
+                text = "Alarm recording",
+                attachmentDisplayName = "Alarm recording.m4a",
+                attachmentMimeType = "audio/mp4",
+                attachmentSizeLabel = "42 KB",
+                attachmentDateLabel = "Yesterday",
+                attachmentActionLabel = "Play",
                 secondaryImage = ContextCompat.getDrawable(
                     this,
                     R.drawable.ic_baseline_access_time_24
@@ -364,12 +392,12 @@ internal class MainActivity : AppCompatActivity() {
         handleSettingGeneralConfiguration()
         handleSettingImageConfiguration()
 
-        main_checklist.applyConfiguration()
+        mainChecklist.applyConfiguration()
     }
 
     private fun handleSettingChecklistConfiguration() {
         // Apply text settings from config to checklist system
-        main_checklist.setTextColor(checklistConfiguration.textColor)
+        mainChecklist.setTextColor(checklistConfiguration.textColor)
             .setLinkTextColor(checklistConfiguration.textLinkTextColor)
             .setTextSize(checklistConfiguration.textSize)
             .setNewItemText(checklistConfiguration.textNewItem)
@@ -378,61 +406,62 @@ internal class MainActivity : AppCompatActivity() {
             .setLinksClickable(checklistConfiguration.textLinksClickable)
 
         checklistConfiguration.textTypeFace?.let {
-            main_checklist.setTextTypeFace(it)
+            mainChecklist.setTextTypeFace(it)
         }
 
         // Apply icon settings from config to checklist system
-        main_checklist.setIconTintColor(checklistConfiguration.iconTintColor)
+        mainChecklist.setIconTintColor(checklistConfiguration.iconTintColor)
             .setDragIndicatorIconAlpha(checklistConfiguration.iconAlphaDragIndicator)
             .setDeleteIconAlpha(checklistConfiguration.iconAlphaDelete)
             .setAddIconAlpha(checklistConfiguration.iconAlphaAdd)
 
         // Apply checkbox settings from config to checklist system
         checklistConfiguration.checkboxTintColor?.let {
-            main_checklist.setCheckboxTintColor(it)
+            mainChecklist.setCheckboxTintColor(it)
         }
 
-        main_checklist.setCheckedItemCheckboxAlpha(checklistConfiguration.checkboxAlphaCheckedItem)
+        mainChecklist.setCheckedItemCheckboxAlpha(checklistConfiguration.checkboxAlphaCheckedItem)
 
         // Apply drag-and-drop settings from config to checklist system
-        main_checklist.setDragAndDropToggleBehavior(checklistConfiguration.dragAndDropToggleBehavior)
+        mainChecklist.setDragAndDropToggleBehavior(checklistConfiguration.dragAndDropToggleBehavior)
             .setDragAndDropDismissKeyboardBehavior(checklistConfiguration.dragAndDismissKeyboardBehavior)
 
         checklistConfiguration.dragAndDropActiveItemBackgroundColor?.let {
-            main_checklist.setDragAndDropItemActiveBackgroundColor(it)
+            mainChecklist.setDragAndDropItemActiveBackgroundColor(it)
         }
 
         // Apply item behavior settings from config to checklist system
-        main_checklist.setOnItemCheckedBehavior(checklistConfiguration.behaviorCheckedItem)
+        mainChecklist.setOnItemCheckedBehavior(checklistConfiguration.behaviorCheckedItem)
             .setOnItemUncheckedBehavior(checklistConfiguration.behaviorUncheckedItem)
+        updateDeleteCheckedItemsMenuState(checklistConfiguration.behaviorCheckedItem)
 
         // Apply item settings from config to checklist system
         checklistConfiguration.itemFirstTopPadding?.let {
-            main_checklist.setItemFirstTopPadding(it)
+            mainChecklist.setItemFirstTopPadding(it)
         }
 
         checklistConfiguration.itemLeftAndRightPadding?.let {
-            main_checklist.setItemLeftAndRightPadding(it)
+            mainChecklist.setItemLeftAndRightPadding(it)
         }
 
         checklistConfiguration.itemTopAndBottomPadding?.let {
-            main_checklist.setItemTopAndBottomPadding(it)
+            mainChecklist.setItemTopAndBottomPadding(it)
         }
 
         checklistConfiguration.itemLastBottomPadding?.let {
-            main_checklist.setItemLastBottomPadding(it)
+            mainChecklist.setItemLastBottomPadding(it)
         }
 
         // Apply text settings from config to edit text
-        main_text.setTextColor(checklistConfiguration.textColor)
-        main_text.setTextSize(TypedValue.COMPLEX_UNIT_PX, checklistConfiguration.textSize)
+        mainText.setTextColor(checklistConfiguration.textColor)
+        mainText.setTextSize(TypedValue.COMPLEX_UNIT_PX, checklistConfiguration.textSize)
         checklistConfiguration.textTypeFace?.let {
-            main_text.typeface = it
+            mainText.typeface = it
         }
     }
 
     private fun handleSettingTitleConfiguration() {
-        main_checklist.setTitleHint(checklistConfiguration.titleHint)
+        mainChecklist.setTitleHint(checklistConfiguration.titleHint)
             .setTitleTextColor(checklistConfiguration.titleTextColor)
             .setTitleLinkTextColor(checklistConfiguration.titleLinkTextColor)
             .setTitleHintTextColor(checklistConfiguration.titleHintTextColor)
@@ -441,49 +470,49 @@ internal class MainActivity : AppCompatActivity() {
     }
 
     private fun handleSettingContentConfiguration() {
-        main_checklist.setContentHint(checklistConfiguration.contentHint)
+        mainChecklist.setContentHint(checklistConfiguration.contentHint)
             .setContentLinkTextColor(checklistConfiguration.contentLinkTextColor)
             .setContentHintTextColor(checklistConfiguration.contentHintTextColor)
             .setContentClickableLinks(checklistConfiguration.contentClickableLinks)
     }
 
     private fun handleSettingChipConfiguration() {
-        main_checklist.setChipBackgroundColor(checklistConfiguration.chipBackgroundColor)
-        main_checklist.setChipStrokeColor(checklistConfiguration.chipStrokeColor)
-        main_checklist.setChipStrokeWidth(checklistConfiguration.chipStrokeWidth)
-        main_checklist.setChipIconSize(checklistConfiguration.chipIconSize)
+        mainChecklist.setChipBackgroundColor(checklistConfiguration.chipBackgroundColor)
+        mainChecklist.setChipStrokeColor(checklistConfiguration.chipStrokeColor)
+        mainChecklist.setChipStrokeWidth(checklistConfiguration.chipStrokeWidth)
+        mainChecklist.setChipIconSize(checklistConfiguration.chipIconSize)
 
         checklistConfiguration.chipIconEndPadding?.let {
-            main_checklist.setChipIconEndPadding(it)
+            mainChecklist.setChipIconEndPadding(it)
         }
 
-        main_checklist.setChipMinHeight(checklistConfiguration.chipMinHeight)
+        mainChecklist.setChipMinHeight(checklistConfiguration.chipMinHeight)
             .setChipHorizontalSpacing(checklistConfiguration.chipHorizontalSpacing)
             .setChipInternalLeftAndRightPadding(checklistConfiguration.chipLeftAndRightInternalPadding)
     }
 
     private fun handleSettingGeneralConfiguration() {
-        main_checklist.setTextEditable(checklistConfiguration.textEditable)
+        mainChecklist.setTextEditable(checklistConfiguration.textEditable)
     }
 
     private fun handleSettingImageConfiguration() {
-        main_checklist.setImageMaxColumnSpan(checklistConfiguration.imageMaxColumnSpan)
+        mainChecklist.setImageMaxColumnSpan(checklistConfiguration.imageMaxColumnSpan)
 
         checklistConfiguration.imageTextColor?.let {
-            main_checklist.setImageTextColor(it)
+            mainChecklist.setImageTextColor(it)
         }
 
-        main_checklist.setImageStrokeColor(checklistConfiguration.imageStrokeColor)
+        mainChecklist.setImageStrokeColor(checklistConfiguration.imageStrokeColor)
             .setImageStrokeWidth(checklistConfiguration.imageStrokeWidth)
             .setImageTextSize(checklistConfiguration.imageTextSize)
             .setImageCornerRadius(checklistConfiguration.imageCornerRadius)
             .setImageInnerPadding(checklistConfiguration.imageInnerPadding)
 
-        main_checklist.setImageLeftAndRightPadding(checklistConfiguration.imageLeftAndRightPadding)
+        mainChecklist.setImageLeftAndRightPadding(checklistConfiguration.imageLeftAndRightPadding)
 
-        main_checklist.setImageTopAndBottomPadding(checklistConfiguration.imageTopAndBottomPadding)
+        mainChecklist.setImageTopAndBottomPadding(checklistConfiguration.imageTopAndBottomPadding)
 
-        main_checklist.setImageAdjustItemTextSize(checklistConfiguration.imageAdjustItemTextSize)
+        mainChecklist.setImageAdjustItemTextSize(checklistConfiguration.imageAdjustItemTextSize)
     }
 
     private fun handleOnConvertToChecklistMenuItemClicked() {
@@ -497,11 +526,12 @@ internal class MainActivity : AppCompatActivity() {
     private fun updateVisibleContentOnConvertMenuItemClicked(isConvertToChecklistMenuItemClicked: Boolean) {
         showNoteEditor = isConvertToChecklistMenuItemClicked
 
-        main_root?.handler?.postDelayed(
+        mainRoot?.handler?.postDelayed(
             {
                 convertToTextMenuItem.isVisible = isConvertToChecklistMenuItemClicked
                 removeCheckedItemsMenuItem.isVisible = isConvertToChecklistMenuItemClicked
                 uncheckCheckedItemsMenuItem.isVisible = isConvertToChecklistMenuItemClicked
+                toggleDeleteCheckedItemsMenuItem.isVisible = isConvertToChecklistMenuItemClicked
 
                 convertToChecklistMenuItem.isVisible = !isConvertToChecklistMenuItemClicked
             },
@@ -509,10 +539,10 @@ internal class MainActivity : AppCompatActivity() {
         )
 
         if (isConvertToChecklistMenuItemClicked) {
-            checklistItemsText = main_text.text.toString()
+            checklistItemsText = mainText.text.toString()
             setItems()
         } else {
-            val items = main_checklist.getEditorItems()
+            val items = mainChecklist.getEditorItems()
 
             items.forEach { item ->
                 when (item) {
@@ -528,17 +558,17 @@ internal class MainActivity : AppCompatActivity() {
                 }
             }
 
-            val content: String = main_checklist.getItems()
-            main_text.setText(content)
+            val content: String = mainChecklist.getItems()
+            mainText.setText(content)
         }
 
-        main_text.visibility = if (isConvertToChecklistMenuItemClicked) {
+        mainText.visibility = if (isConvertToChecklistMenuItemClicked) {
             View.GONE
         } else {
             View.VISIBLE
         }
 
-        main_checklist.visibility = if (isConvertToChecklistMenuItemClicked) {
+        mainChecklist.visibility = if (isConvertToChecklistMenuItemClicked) {
             View.VISIBLE
         } else {
             View.GONE
@@ -547,7 +577,7 @@ internal class MainActivity : AppCompatActivity() {
 
     private fun handleOnRemoveCheckedItemsMenuItemClicked() {
         val itemIdsOfRemovedItems =
-            main_checklist.removeAllCheckedItems()
+            mainChecklist.removeAllCheckedItems()
 
         val message = resources.getQuantityString(
             R.plurals.item_checked_removed,
@@ -555,17 +585,41 @@ internal class MainActivity : AppCompatActivity() {
             itemIdsOfRemovedItems.size
         )
 
-        Snackbar.make(main_root, message, Snackbar.LENGTH_LONG).apply {
+        Snackbar.make(mainRoot, message, Snackbar.LENGTH_LONG).apply {
             if (itemIdsOfRemovedItems.isNotEmpty()) {
                 setAction("undo") {
-                    main_checklist.restoreDeletedItems(itemIdsOfRemovedItems)
+                    mainChecklist.restoreDeletedItems(itemIdsOfRemovedItems)
                 }
             }
         }.show()
     }
 
     private fun handleOnUncheckCheckedItemsMenuItemClicked() {
-        main_checklist.uncheckAllCheckedItems()
+        mainChecklist.uncheckAllCheckedItems()
+    }
+
+    private fun handleOnToggleDeleteCheckedItemsMenuItemClicked() {
+        val behavior = if (toggleDeleteCheckedItemsMenuItem.isChecked) {
+            BehaviorCheckedItem.MOVE_TO_TOP_OF_CHECKED_ITEMS
+        } else {
+            BehaviorCheckedItem.DELETE
+        }
+
+        mainChecklist
+            .setOnItemCheckedBehavior(behavior)
+            .applyConfiguration()
+        updateDeleteCheckedItemsMenuState(behavior)
+    }
+
+    private fun updateDeleteCheckedItemsMenuState(behavior: BehaviorCheckedItem) {
+        if (::toggleDeleteCheckedItemsMenuItem.isInitialized) {
+            toggleDeleteCheckedItemsMenuItem.isChecked = behavior == BehaviorCheckedItem.DELETE
+            toggleDeleteCheckedItemsMenuItem.title = if (toggleDeleteCheckedItemsMenuItem.isChecked) {
+                getString(R.string.menu_keep_checked_items)
+            } else {
+                getString(R.string.menu_delete_checked_items)
+            }
+        }
     }
 
     private fun handleOnDNotesMenuItemClicked() {

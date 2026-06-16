@@ -4,17 +4,21 @@ apply from: rootProject.file("gradle/android_common_config.gradle")
 apply from: rootProject.file("gradle/android_signing_config.gradle")
 
 android {
-    android.defaultConfig.applicationId "com.dvdb.materialeditor"
+    namespace = "com.dvdb.checklist"
+
+    defaultConfig {
+        applicationId = "com.dvdb.materialeditor"
+    }
     buildTypes {
         release {
-            minifyEnabled true
-            shrinkResources true
+            minifyEnabled = true
+            shrinkResources = true
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'),
                     'proguard-glide.pro'
         }
         debug {
-            applicationIdSuffix ".debug"
-            versionNameSuffix '-debug'
+            applicationIdSuffix = ".debug"
+            versionNameSuffix = '-debug'
         }
     }
 }

@@ -26,8 +26,28 @@ internal class ImageManagerImpl : ImageManager {
 
     override var onImageItemLongClicked: (item: ImageItem) -> Boolean = { false }
 
+    override var onAttachmentItemOpened: (item: ImageItem) -> Unit = {
+        onImageItemClicked(it)
+    }
+
+    override var onAttachmentItemShared: (item: ImageItem) -> Unit = {}
+
+    override var onAttachmentItemRemoved: (item: ImageItem) -> Unit = {}
+
     override val onImageItemInContainerClicked: (item: ImageRecyclerItem) -> Unit = {
         onImageItemClicked(it.transform())
+    }
+
+    override val onAttachmentItemInContainerOpened: (item: ImageRecyclerItem) -> Unit = {
+        onAttachmentItemOpened(it.transform())
+    }
+
+    override val onAttachmentItemInContainerShared: (item: ImageRecyclerItem) -> Unit = {
+        onAttachmentItemShared(it.transform())
+    }
+
+    override val onAttachmentItemInContainerRemoved: (item: ImageRecyclerItem) -> Unit = {
+        onAttachmentItemRemoved(it.transform())
     }
 
     override val onImageItemInContainerLongClicked: (item: ImageRecyclerItem) -> Boolean = {

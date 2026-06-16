@@ -27,6 +27,7 @@ import com.dvdb.materialchecklist.config.checklist.model.BehaviorCheckedItem
 import com.dvdb.materialchecklist.config.checklist.model.BehaviorUncheckedItem
 import com.dvdb.materialchecklist.config.checklist.model.DragAndDropDismissKeyboardBehavior
 import com.dvdb.materialchecklist.config.checklist.model.DragAndDropToggleBehavior
+import com.dvdb.materialchecklist.R as MaterialChecklistR
 
 internal class ChecklistConfiguration(
     private val context: Context,
@@ -180,18 +181,21 @@ internal class ChecklistConfiguration(
      * Image
      */
     val imageMaxColumnSpan: Int =
-        context.resources.getInteger(R.integer.mc_item_image_container_column_span)
+        context.resources.getInteger(MaterialChecklistR.integer.mc_item_image_container_column_span)
     val imageTextColor: Int? = null
-    val imageStrokeColor: Int = ContextCompat.getColor(context, R.color.mc_image_container_stroke)
+    val imageStrokeColor: Int =
+        ContextCompat.getColor(context, MaterialChecklistR.color.mc_image_container_stroke)
     val imageStrokeWidth: Int =
-        context.resources.getDimensionPixelSize(R.dimen.mc_item_image_stroke_width)
-    val imageTextSize: Float = context.resources.getDimension(R.dimen.mc_item_image_text_size)
+        context.resources.getDimensionPixelSize(MaterialChecklistR.dimen.mc_item_image_stroke_width)
+    val imageTextSize: Float =
+        context.resources.getDimension(MaterialChecklistR.dimen.mc_item_image_text_size)
     val imageCornerRadius: Float =
-        context.resources.getDimension(R.dimen.mc_item_image_corner_radius)
+        context.resources.getDimension(MaterialChecklistR.dimen.mc_item_image_corner_radius)
     val imageInnerPadding: Float =
-        context.resources.getDimension(R.dimen.mc_item_image_inner_margin)
+        context.resources.getDimension(MaterialChecklistR.dimen.mc_item_image_inner_margin)
     val imageLeftAndRightPadding: Float = 0f
-    val imageTopAndBottomPadding: Float = context.resources.getDimension(R.dimen.mc_spacing_large)
+    val imageTopAndBottomPadding: Float =
+        context.resources.getDimension(MaterialChecklistR.dimen.mc_spacing_large)
     val imageAdjustItemTextSize: Boolean = true
 
     /**

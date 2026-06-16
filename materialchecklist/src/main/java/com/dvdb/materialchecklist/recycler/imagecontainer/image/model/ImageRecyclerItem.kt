@@ -23,15 +23,37 @@ internal data class ImageRecyclerItem(
     val id: Int,
     val text: String,
     val primaryImage: Drawable?,
-    val primaryImageUri: Uri = Uri.EMPTY,
+    val primaryImageUri: Uri? = null,
     val secondaryImage: Drawable?,
-    val secondaryImageUri: Uri = Uri.EMPTY
+    val secondaryImageUri: Uri? = null,
+    val attachmentUri: Uri? = null,
+    val attachmentMimeType: String = "",
+    val attachmentDisplayName: String = "",
+    val attachmentSizeLabel: String = "",
+    val attachmentDateLabel: String = "",
+    val attachmentActionLabel: String = ""
 ) {
-    val shouldShowText: Boolean = text.isNotBlank()
+    val displayText: String = attachmentDisplayName.ifBlank { text }
+    val shouldShowText: Boolean = displayText.isNotBlank()
+
+    val attachmentMetadataLabel: String = listOf(attachmentMimeType, attachmentSizeLabel, attachmentDateLabel)
+        .filter { it.isNotBlank() }
+        .joinToString(" - ")
+
+    val isAttachmentSet: Boolean = attachmentUri != null ||
+            attachmentMimeType.isNotBlank() ||
+            attachmentDisplayName.isNotBlank() ||
+            attachmentSizeLabel.isNotBlank() ||
+            attachmentDateLabel.isNotBlank() ||
+            attachmentActionLabel.isNotBlank()
+
+    val openActionLabel: String = attachmentActionLabel
+    val shouldShowAttachmentMetadata: Boolean = attachmentMetadataLabel.isNotBlank()
+    val shouldShowAttachmentActions: Boolean = isAttachmentSet
 
     val isPrimaryImageDrawableSet: Boolean = primaryImage != null
-    val isPrimaryImageUriSet: Boolean = primaryImageUri != Uri.EMPTY
+    val isPrimaryImageUriSet: Boolean = primaryImageUri != null
 
     val isSecondaryImageDrawableSet: Boolean = secondaryImage != null
-    val isSecondaryImageUriSet: Boolean = secondaryImageUri != Uri.EMPTY
+    val isSecondaryImageUriSet: Boolean = secondaryImageUri != null
 }

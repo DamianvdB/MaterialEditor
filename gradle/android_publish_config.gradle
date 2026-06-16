@@ -28,8 +28,8 @@ if (secretPropsFile.exists()) {
     ext["ossrhPassword"] = System.getenv('OSSRH_PASSWORD')
 }
 
-group GROUP
-version versions.publish_version
+group = GROUP
+version = versions.publish_version
 
 afterEvaluate {
     if (JavaVersion.current().isJava8Compatible()) {
@@ -38,22 +38,6 @@ afterEvaluate {
                 options.addStringOption("Xdoclint:none", "-quiet")
             }
         }
-    }
-
-    task androidJavadocs(type: Javadoc) {
-        failOnError = false
-        source = android.sourceSets.main.java.source
-        classpath += project.files(android.getBootClasspath().join(File.pathSeparator))
-    }
-
-    task androidJavadocsJar(type: Jar, dependsOn: androidJavadocs) {
-        classifier = "javadoc"
-        from androidJavadocs.destinationDir
-    }
-
-    task androidSourcesJar(type: Jar) {
-        classifier = "sources"
-        from android.sourceSets.main.java.source
     }
 
     def pomConfig = {
@@ -86,9 +70,6 @@ afterEvaluate {
                 // Applies the component for the release build variant.
                 from components.release
 
-                artifact androidSourcesJar
-                artifact androidJavadocsJar
-
                 groupId = GROUP
                 artifactId = POM_ARTIFACT_ID
                 version = versions.publish_version
@@ -110,8 +91,8 @@ afterEvaluate {
                 url = version.endsWith('SNAPSHOT') ? snapshotsRepoUrl : releasesRepoUrl
 
                 credentials {
-                    username ossrhUsername
-                    password ossrhPassword
+                    username = ossrhUsername
+                    password = ossrhPassword
                 }
             }
         }

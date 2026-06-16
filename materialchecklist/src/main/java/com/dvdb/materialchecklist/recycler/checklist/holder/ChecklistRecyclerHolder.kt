@@ -42,7 +42,6 @@ import com.dvdb.materialchecklist.recycler.util.holder.RequestFocusRecyclerHolde
 import com.dvdb.materialchecklist.util.*
 import com.dvdb.materialchecklist.widget.CheckboxWidget
 import com.dvdb.materialchecklist.widget.MultiLineEditTextWidget
-import kotlinx.android.synthetic.main.item_checklist.view.*
 
 private const val DEFAULT_ALPHA = 1.0f
 
@@ -57,10 +56,11 @@ internal class ChecklistRecyclerHolder private constructor(
 
     private val defaultBackground: Drawable? = itemView.background
 
-    private val dragIndicatorIcon: ImageView = itemView.item_checklist_drag_indicator
-    private val checkbox: CheckboxWidget = itemView.item_checklist_checkbox
-    private val text: MultiLineEditTextWidget = itemView.item_checklist_text
-    private val deleteIcon: ImageView = itemView.item_checklist_delete
+    private val dragIndicatorIcon: ImageView =
+        itemView.findViewById(R.id.item_checklist_drag_indicator)
+    private val checkbox: CheckboxWidget = itemView.findViewById(R.id.item_checklist_checkbox)
+    private val text: MultiLineEditTextWidget = itemView.findViewById(R.id.item_checklist_text)
+    private val deleteIcon: ImageView = itemView.findViewById(R.id.item_checklist_delete)
 
     init {
         initialiseView()

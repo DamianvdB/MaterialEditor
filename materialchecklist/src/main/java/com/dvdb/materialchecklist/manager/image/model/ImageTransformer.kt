@@ -35,7 +35,13 @@ internal fun ImageItem.transform() = ImageRecyclerItem(
     primaryImage = primaryImage,
     primaryImageUri = primaryImageUri,
     secondaryImage = secondaryImage,
-    secondaryImageUri = secondaryImageUri
+    secondaryImageUri = secondaryImageUri,
+    attachmentUri = attachmentUri,
+    attachmentMimeType = attachmentMimeType,
+    attachmentDisplayName = attachmentDisplayName,
+    attachmentSizeLabel = attachmentSizeLabel,
+    attachmentDateLabel = attachmentDateLabel,
+    attachmentActionLabel = attachmentActionLabel
 )
 
 internal fun ImageRecyclerItem.transform() = ImageItem(
@@ -44,5 +50,11 @@ internal fun ImageRecyclerItem.transform() = ImageItem(
     primaryImage = primaryImage,
     primaryImageUri = primaryImageUri,
     secondaryImage = secondaryImage,
-    secondaryImageUri = secondaryImageUri
+    secondaryImageUri = secondaryImageUri,
+    attachmentUri = attachmentUri,
+    attachmentMimeType = attachmentMimeType,
+    attachmentDisplayName = attachmentDisplayName,
+    attachmentSizeLabel = attachmentSizeLabel,
+    attachmentDateLabel = attachmentDateLabel,
+    attachmentActionLabel = attachmentActionLabel
 )

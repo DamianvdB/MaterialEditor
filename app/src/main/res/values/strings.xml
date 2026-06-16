@@ -9,6 +9,8 @@
     <string name="menu_uncheck_checked_items">Uncheck checked items</string>
     <string name="menu_convert_to_text">Convert to text</string>
     <string name="menu_convert_to_checklist">Convert to checklist</string>
+    <string name="menu_delete_checked_items">Delete checked items when checked</string>
+    <string name="menu_keep_checked_items">Keep checked items when checked</string>
     <string name="menu_d_notes">Check my D Notes app</string>
 
     <plurals name="item_checked_removed">

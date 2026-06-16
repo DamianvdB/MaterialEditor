@@ -23,7 +23,21 @@ data class ImageItem(
     val id: Int,
     val text: String = "",
     val primaryImage: Drawable? = null,
-    val primaryImageUri: Uri = Uri.EMPTY,
+    val primaryImageUri: Uri? = null,
     val secondaryImage: Drawable? = null,
-    val secondaryImageUri: Uri = Uri.EMPTY
-)
+    val secondaryImageUri: Uri? = null,
+    val attachmentUri: Uri? = null,
+    val attachmentMimeType: String = "",
+    val attachmentDisplayName: String = "",
+    val attachmentSizeLabel: String = "",
+    val attachmentDateLabel: String = "",
+    val attachmentActionLabel: String = ""
+) {
+    val resolvedAttachmentDisplayName: String
+        get() = attachmentDisplayName.ifBlank { text }
+
+    val attachmentMetadataLabel: String
+        get() = listOf(attachmentMimeType, attachmentSizeLabel, attachmentDateLabel)
+            .filter { it.isNotBlank() }
+            .joinToString(" - ")
+}

@@ -32,7 +32,6 @@ import com.dvdb.materialchecklist.recycler.title.model.TitleRecyclerHolderConfig
 import com.dvdb.materialchecklist.recycler.title.model.TitleRecyclerItem
 import com.dvdb.materialchecklist.recycler.util.holder.RequestFocusRecyclerHolder
 import com.dvdb.materialchecklist.util.*
-import kotlinx.android.synthetic.main.item_title.view.*
 
 internal class TitleRecyclerHolder private constructor(
     itemView: View,
@@ -41,8 +40,8 @@ internal class TitleRecyclerHolder private constructor(
 ) : BaseRecyclerHolder<TitleRecyclerItem, TitleRecyclerHolderConfig>(itemView, config),
     RequestFocusRecyclerHolder {
 
-    private val text: EditText = itemView.item_title_text
-    private val actionIcon: ImageView = itemView.item_title_action_icon
+    private val text: EditText = itemView.findViewById(R.id.item_title_text)
+    private val actionIcon: ImageView = itemView.findViewById(R.id.item_title_action_icon)
 
     init {
         initialiseView()
@@ -146,7 +145,7 @@ internal class TitleRecyclerHolder private constructor(
                 if (text.isFocused) {
                     s?.let { text ->
                         listener.onTitleItemTextChanged(
-                            adapterPosition,
+                            bindingAdapterPosition,
                             text.toString()
                         )
                     }
@@ -156,7 +155,7 @@ internal class TitleRecyclerHolder private constructor(
 
         text.setOnFocusChangeListener { _, hasFocus ->
             listener.onTitleItemFocusChanged(
-                position = adapterPosition,
+                position = bindingAdapterPosition,
                 startSelection = text.selectionStart,
                 endSelection = text.selectionEnd,
                 hasFocus = hasFocus
@@ -166,7 +165,7 @@ internal class TitleRecyclerHolder private constructor(
 
     private fun initActionIconListener() {
         actionIcon.setOnClickListener {
-            listener.onTitleItemActionIconClicked(adapterPosition)
+            listener.onTitleItemActionIconClicked(bindingAdapterPosition)
         }
     }
 

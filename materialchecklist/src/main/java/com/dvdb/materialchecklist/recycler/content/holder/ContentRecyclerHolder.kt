@@ -126,7 +126,7 @@ internal class ContentRecyclerHolder private constructor(
                 if (text.isFocused) {
                     s?.let { text ->
                         listener.onContentItemTextChanged(
-                            adapterPosition,
+                            bindingAdapterPosition,
                             text.toString()
                         )
                     }
@@ -138,7 +138,7 @@ internal class ContentRecyclerHolder private constructor(
 
         text.setOnFocusChangeListener { _, hasFocus ->
             listener.onContentItemFocusChanged(
-                position = adapterPosition,
+                position = bindingAdapterPosition,
                 startSelection = text.selectionStart,
                 endSelection = text.selectionEnd,
                 hasFocus = hasFocus

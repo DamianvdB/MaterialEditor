@@ -38,7 +38,9 @@ private const val MAX_COLUMN_SPAN_FOR_TWO_TEXT_LINES = 4
 internal class ImageContainerRecyclerHolder private constructor(
     private val recyclerView: RecyclerView,
     config: ImageContainerRecyclerHolderConfig,
-    private val onItemClicked: (item: ImageRecyclerItem) -> Unit,
+    private val onItemOpened: (item: ImageRecyclerItem) -> Unit,
+    private val onItemShared: (item: ImageRecyclerItem) -> Unit,
+    private val onItemRemoved: (item: ImageRecyclerItem) -> Unit,
     private val onItemLongClicked: (item: ImageRecyclerItem) -> Boolean
 ) : BaseRecyclerHolder<ImageContainerRecyclerItem, ImageContainerRecyclerHolderConfig>(
     recyclerView,
@@ -126,7 +128,17 @@ internal class ImageContainerRecyclerHolder private constructor(
             ImageRecyclerHolder.Factory(
                 onItemClicked = {
                     getItemForPosition(it)?.let { item ->
-                        onItemClicked(item)
+                        onItemOpened(item)
+                    }
+                },
+                onItemShareClicked = {
+                    getItemForPosition(it)?.let { item ->
+                        onItemShared(item)
+                    }
+                },
+                onItemRemoveClicked = {
+                    getItemForPosition(it)?.let { item ->
+                        onItemRemoved(item)
                     }
                 },
                 onItemLongClicked = {
@@ -197,7 +209,9 @@ internal class ImageContainerRecyclerHolder private constructor(
     }
 
     class Factory(
-        private val onItemClicked: (item: ImageRecyclerItem) -> Unit,
+        private val onItemOpened: (item: ImageRecyclerItem) -> Unit,
+        private val onItemShared: (item: ImageRecyclerItem) -> Unit,
+        private val onItemRemoved: (item: ImageRecyclerItem) -> Unit,
         private val onItemLongClicked: (item: ImageRecyclerItem) -> Boolean
     ) : BaseRecyclerHolderFactory<ImageContainerRecyclerItem, ImageContainerRecyclerHolderConfig> {
 
@@ -208,7 +222,9 @@ internal class ImageContainerRecyclerHolder private constructor(
             return ImageContainerRecyclerHolder(
                 createRecyclerView(parent),
                 config,
-                onItemClicked,
+                onItemOpened,
+                onItemShared,
+                onItemRemoved,
                 onItemLongClicked
             )
         }

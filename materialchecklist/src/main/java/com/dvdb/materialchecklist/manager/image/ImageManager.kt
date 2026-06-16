@@ -26,7 +26,19 @@ internal interface ImageManager : ChecklistItemAdapterDragListener {
 
     var onImageItemLongClicked: (item: ImageItem) -> Boolean
 
+    var onAttachmentItemOpened: (item: ImageItem) -> Unit
+
+    var onAttachmentItemShared: (item: ImageItem) -> Unit
+
+    var onAttachmentItemRemoved: (item: ImageItem) -> Unit
+
     val onImageItemInContainerClicked: (item: ImageRecyclerItem) -> Unit
+
+    val onAttachmentItemInContainerOpened: (item: ImageRecyclerItem) -> Unit
+
+    val onAttachmentItemInContainerShared: (item: ImageRecyclerItem) -> Unit
+
+    val onAttachmentItemInContainerRemoved: (item: ImageRecyclerItem) -> Unit
 
     val onImageItemInContainerLongClicked: (item: ImageRecyclerItem) -> Boolean
 }

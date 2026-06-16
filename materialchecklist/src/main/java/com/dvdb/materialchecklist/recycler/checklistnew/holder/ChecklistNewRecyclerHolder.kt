@@ -28,7 +28,6 @@ import com.dvdb.materialchecklist.recycler.base.holder.BaseRecyclerHolderFactory
 import com.dvdb.materialchecklist.recycler.checklistnew.model.ChecklistNewRecyclerHolderConfig
 import com.dvdb.materialchecklist.recycler.checklistnew.model.ChecklistNewRecyclerItem
 import com.dvdb.materialchecklist.util.setTintCompat
-import kotlinx.android.synthetic.main.item_checklist_new.view.*
 
 internal class ChecklistNewRecyclerHolder private constructor(
     itemView: View,
@@ -39,8 +38,8 @@ internal class ChecklistNewRecyclerHolder private constructor(
     config
 ) {
 
-    private val addIcon: ImageView = itemView.item_checklist_new_add
-    private val text: TextView = itemView.item_checklist_new_text
+    private val addIcon: ImageView = itemView.findViewById(R.id.item_checklist_new_add)
+    private val text: TextView = itemView.findViewById(R.id.item_checklist_new_text)
 
     init {
         initialiseView()

@@ -39,9 +39,64 @@
         android:ellipsize="end"
         android:gravity="center"
         android:paddingBottom="@dimen/mc_spacing_small"
-        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintBottom_toTopOf="@id/item_image_metadata"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         tools:text="Image description goes here" />
+
+    <TextView
+        android:id="@+id/item_image_metadata"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="@dimen/mc_spacing_medium"
+        android:layout_marginEnd="@dimen/mc_spacing_medium"
+        android:ellipsize="end"
+        android:gravity="center"
+        android:paddingBottom="@dimen/mc_spacing_tiny"
+        app:layout_constraintBottom_toTopOf="@id/item_image_actions"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        tools:text="application/pdf - 128 KB - Today" />
+
+    <LinearLayout
+        android:id="@+id/item_image_actions"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="@dimen/mc_spacing_medium"
+        android:layout_marginEnd="@dimen/mc_spacing_medium"
+        android:gravity="center"
+        android:orientation="horizontal"
+        android:paddingBottom="@dimen/mc_spacing_small"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent">
+
+        <TextView
+            android:id="@+id/item_image_action_open"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:ellipsize="end"
+            android:paddingStart="@dimen/mc_spacing_small"
+            android:paddingEnd="@dimen/mc_spacing_small"
+            tools:text="Open" />
+
+        <TextView
+            android:id="@+id/item_image_action_share"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:ellipsize="end"
+            android:paddingStart="@dimen/mc_spacing_small"
+            android:paddingEnd="@dimen/mc_spacing_small"
+            android:text="@string/mc_item_image_action_share" />
+
+        <TextView
+            android:id="@+id/item_image_action_remove"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:ellipsize="end"
+            android:paddingStart="@dimen/mc_spacing_small"
+            android:paddingEnd="@dimen/mc_spacing_small"
+            android:text="@string/mc_item_image_action_remove" />
+    </LinearLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

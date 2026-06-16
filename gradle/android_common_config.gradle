@@ -1,15 +1,11 @@
-apply plugin: "kotlin-android"
-apply plugin: "kotlin-android-extensions"
-
 apply from: rootProject.file("dependencies.gradle")
 
 android {
     compileSdkVersion versions.compile_sdk
-    buildToolsVersion versions.build_tools
 
     compileOptions {
-        sourceCompatibility 1.8
-        targetCompatibility 1.8
+        sourceCompatibility JavaVersion.VERSION_21
+        targetCompatibility JavaVersion.VERSION_21
     }
 
     defaultConfig {
@@ -17,6 +13,7 @@ android {
         targetSdkVersion versions.compile_sdk
         versionCode versions.publish_version_code
         versionName versions.publish_version
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
 
     testOptions {
@@ -38,6 +35,12 @@ dependencies {
 
     testImplementation deps.junit.api
     testRuntimeOnly deps.junit.engine
+    testRuntimeOnly deps.junit.launcher
+
+    androidTestImplementation deps.androidx.test_core
+    androidTestImplementation deps.androidx.test_ext_junit
+    androidTestImplementation deps.androidx.test_rules
+    androidTestImplementation deps.androidx.test_runner
 }
 
 tasks.withType(Javadoc).configureEach {
