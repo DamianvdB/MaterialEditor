@@ -17,6 +17,7 @@
 package com.dvdb.materialchecklist.config.checklist
 
 import android.graphics.Typeface
+import androidx.annotation.CheckResult
 import androidx.annotation.ColorInt
 import androidx.annotation.ColorRes
 import androidx.annotation.DimenRes
@@ -362,6 +363,14 @@ fun MaterialChecklist.setOnItemCheckedBehavior(behavior: BehaviorCheckedItem): M
         config.behaviorCheckedItem = behavior
     }
     return this
+}
+
+/**
+ * Get the currently configured checklist item behavior for when an item is checked.
+ */
+@CheckResult
+fun MaterialChecklist.getOnItemCheckedBehavior(): BehaviorCheckedItem {
+    return config.behaviorCheckedItem
 }
 
 /**

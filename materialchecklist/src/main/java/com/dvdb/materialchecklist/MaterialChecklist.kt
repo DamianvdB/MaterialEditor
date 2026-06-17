@@ -18,13 +18,19 @@ package com.dvdb.materialchecklist
 
 import android.content.Context
 import android.util.AttributeSet
+import android.view.Menu
+import android.view.MenuItem
 import android.view.View
 import android.widget.FrameLayout
 import androidx.annotation.CheckResult
+import androidx.appcompat.widget.PopupMenu
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.dvdb.materialchecklist.config.ChecklistConfig
+import com.dvdb.materialchecklist.config.checklist.model.BehaviorCheckedItem
+import com.dvdb.materialchecklist.config.checklist.setOnItemCheckedBehavior
+import com.dvdb.materialchecklist.config.general.applyConfiguration
 import com.dvdb.materialchecklist.manager.Manager
 import com.dvdb.materialchecklist.manager.checklist.ChecklistManagerImpl
 import com.dvdb.materialchecklist.manager.checklist.model.ChecklistItem
@@ -278,6 +284,135 @@ class MaterialChecklist(
     }
 
     /**
+     * Create a reusable D Notes-style checklist overflow menu for this editor.
+     *
+     * The returned [PopupMenu] is useful when callers need to add more host-owned actions before
+     * showing it. Use [showChecklistMenu] when no additional configuration is needed.
+     */
+    @CheckResult
+    fun createChecklistMenu(
+        anchor: View,
+        keepCheckboxSymbols: Boolean = true,
+        keepCheckedItems: Boolean = true,
+        showDeleteItemWhenChecked: Boolean = true,
+        deleteItemWhenChecked: Boolean = config.behaviorCheckedItem == BehaviorCheckedItem.DELETE,
+        onDeleteItemWhenCheckedChanged: ((Boolean) -> Unit)? = null,
+        onActionResult: (ChecklistMenuAction, ChecklistMenuActionResult) -> Unit = { _, _ -> }
+    ): PopupMenu {
+        return PopupMenu(anchor.context, anchor).apply {
+            menu.addChecklistAction(
+                itemId = CHECKLIST_MENU_ITEM_CONVERT_TO_TEXT,
+                order = 0,
+                title = context.getString(R.string.mc_checklist_menu_convert_to_text)
+            )
+            menu.addChecklistAction(
+                itemId = CHECKLIST_MENU_ITEM_UNCHECK_ALL,
+                order = 1,
+                title = context.getString(R.string.mc_checklist_menu_uncheck_all)
+            )
+            menu.addChecklistAction(
+                itemId = CHECKLIST_MENU_ITEM_REMOVE_CHECKED,
+                order = 2,
+                title = context.getString(R.string.mc_checklist_menu_remove_checked)
+            )
+            if (showDeleteItemWhenChecked) {
+                menu.addChecklistAction(
+                    itemId = CHECKLIST_MENU_ITEM_DELETE_ITEM_WHEN_CHECKED,
+                    order = 3,
+                    title = context.getString(R.string.mc_checklist_menu_delete_item_when_checked)
+                ).apply {
+                    isCheckable = true
+                    isChecked = deleteItemWhenChecked
+                }
+            }
+            setOnMenuItemClickListener { item ->
+                handleChecklistMenuItemClick(
+                    item = item,
+                    keepCheckboxSymbols = keepCheckboxSymbols,
+                    keepCheckedItems = keepCheckedItems,
+                    onDeleteItemWhenCheckedChanged = onDeleteItemWhenCheckedChanged,
+                    onActionResult = onActionResult
+                )
+            }
+        }
+    }
+
+    /**
+     * Show a reusable D Notes-style checklist overflow menu for this editor.
+     */
+    fun showChecklistMenu(
+        anchor: View,
+        keepCheckboxSymbols: Boolean = true,
+        keepCheckedItems: Boolean = true,
+        showDeleteItemWhenChecked: Boolean = true,
+        deleteItemWhenChecked: Boolean = config.behaviorCheckedItem == BehaviorCheckedItem.DELETE,
+        onDeleteItemWhenCheckedChanged: ((Boolean) -> Unit)? = null,
+        onActionResult: (ChecklistMenuAction, ChecklistMenuActionResult) -> Unit = { _, _ -> }
+    ): PopupMenu {
+        return createChecklistMenu(
+            anchor = anchor,
+            keepCheckboxSymbols = keepCheckboxSymbols,
+            keepCheckedItems = keepCheckedItems,
+            showDeleteItemWhenChecked = showDeleteItemWhenChecked,
+            deleteItemWhenChecked = deleteItemWhenChecked,
+            onDeleteItemWhenCheckedChanged = onDeleteItemWhenCheckedChanged,
+            onActionResult = onActionResult
+        ).also { it.show() }
+    }
+
+    private fun handleChecklistMenuItemClick(
+        item: MenuItem,
+        keepCheckboxSymbols: Boolean,
+        keepCheckedItems: Boolean,
+        onDeleteItemWhenCheckedChanged: ((Boolean) -> Unit)?,
+        onActionResult: (ChecklistMenuAction, ChecklistMenuActionResult) -> Unit
+    ): Boolean {
+        return when (item.itemId) {
+            CHECKLIST_MENU_ITEM_CONVERT_TO_TEXT -> {
+                performChecklistMenuAction(
+                    action = ChecklistMenuAction.CONVERT_TO_TEXT,
+                    keepCheckboxSymbols = keepCheckboxSymbols,
+                    keepCheckedItems = keepCheckedItems
+                ).also { result ->
+                    onActionResult(ChecklistMenuAction.CONVERT_TO_TEXT, result)
+                }
+                true
+            }
+            CHECKLIST_MENU_ITEM_UNCHECK_ALL -> {
+                performChecklistMenuAction(ChecklistMenuAction.UNCHECK_CHECKED_ITEMS)
+                    .also { result ->
+                        onActionResult(ChecklistMenuAction.UNCHECK_CHECKED_ITEMS, result)
+                    }
+                true
+            }
+            CHECKLIST_MENU_ITEM_REMOVE_CHECKED -> {
+                performChecklistMenuAction(ChecklistMenuAction.REMOVE_CHECKED_ITEMS)
+                    .also { result ->
+                        onActionResult(ChecklistMenuAction.REMOVE_CHECKED_ITEMS, result)
+                    }
+                true
+            }
+            CHECKLIST_MENU_ITEM_DELETE_ITEM_WHEN_CHECKED -> {
+                val enabled = !item.isChecked
+                item.isChecked = enabled
+                if (onDeleteItemWhenCheckedChanged != null) {
+                    onDeleteItemWhenCheckedChanged(enabled)
+                } else {
+                    setOnItemCheckedBehavior(
+                        if (enabled) {
+                            BehaviorCheckedItem.DELETE
+                        } else {
+                            BehaviorCheckedItem.MOVE_TO_TOP_OF_CHECKED_ITEMS
+                        }
+                    ).applyConfiguration()
+                }
+                true
+            }
+            else -> false
+        }
+    }
+
+    /**
      * Get the total number of checklist items.
      *
      * @return number of checklist items.
@@ -337,6 +472,14 @@ class MaterialChecklist(
      */
     fun updateChecklistItem(item: ChecklistItem): Boolean {
         return manager.updateChecklistItem(item)
+    }
+
+    private fun Menu.addChecklistAction(
+        itemId: Int,
+        order: Int,
+        title: String
+    ): MenuItem {
+        return add(0, itemId, order, title)
     }
 
     private fun addFocusableView() {
@@ -555,3 +698,8 @@ class MaterialChecklist(
         }
     }
 }
+
+private const val CHECKLIST_MENU_ITEM_CONVERT_TO_TEXT = 1
+private const val CHECKLIST_MENU_ITEM_UNCHECK_ALL = 2
+private const val CHECKLIST_MENU_ITEM_REMOVE_CHECKED = 3
+private const val CHECKLIST_MENU_ITEM_DELETE_ITEM_WHEN_CHECKED = 4

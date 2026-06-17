@@ -3,6 +3,10 @@
     <string name="mc_item_checklist_new_content_description_add">Add</string>
     <string name="mc_item_checklist_content_description_drag_indicator">Drag Indicator</string>
     <string name="mc_item_checklist_content_description_delete">Delete</string>
+    <string name="mc_checklist_menu_convert_to_text">Convert to Text Note</string>
+    <string name="mc_checklist_menu_uncheck_all">Uncheck all</string>
+    <string name="mc_checklist_menu_remove_checked">Remove checked</string>
+    <string name="mc_checklist_menu_delete_item_when_checked">Delete item when checked</string>
     <string name="mc_item_image_action_open">Open</string>
     <string name="mc_item_image_action_share">Share</string>
     <string name="mc_item_image_action_remove">Remove</string>
