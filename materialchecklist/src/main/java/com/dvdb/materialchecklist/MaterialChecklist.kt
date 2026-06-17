@@ -87,6 +87,8 @@ class MaterialChecklist(
     )
 
     private val recyclerView: RecyclerView
+    private var onChecklistMenuActionResult: (ChecklistMenuAction, ChecklistMenuActionResult) -> Unit =
+        { _, _ -> }
 
     @Suppress("UNNECESSARY_SAFE_CALL")
     private val items: List<BaseRecyclerItem>
@@ -284,6 +286,15 @@ class MaterialChecklist(
     }
 
     /**
+     * Set a listener for actions selected from the built-in checklist overflow menu.
+     */
+    fun setOnChecklistMenuActionResultListener(
+        listener: (ChecklistMenuAction, ChecklistMenuActionResult) -> Unit
+    ) {
+        onChecklistMenuActionResult = listener
+    }
+
+    /**
      * Create a reusable D Notes-style checklist overflow menu for this editor.
      *
      * The returned [PopupMenu] is useful when callers need to add more host-owned actions before
@@ -297,7 +308,8 @@ class MaterialChecklist(
         showDeleteItemWhenChecked: Boolean = true,
         deleteItemWhenChecked: Boolean = config.behaviorCheckedItem == BehaviorCheckedItem.DELETE,
         onDeleteItemWhenCheckedChanged: ((Boolean) -> Unit)? = null,
-        onActionResult: (ChecklistMenuAction, ChecklistMenuActionResult) -> Unit = { _, _ -> }
+        onActionResult: (ChecklistMenuAction, ChecklistMenuActionResult) -> Unit =
+            onChecklistMenuActionResult
     ): PopupMenu {
         return PopupMenu(anchor.context, anchor).apply {
             menu.addChecklistAction(
@@ -347,7 +359,8 @@ class MaterialChecklist(
         showDeleteItemWhenChecked: Boolean = true,
         deleteItemWhenChecked: Boolean = config.behaviorCheckedItem == BehaviorCheckedItem.DELETE,
         onDeleteItemWhenCheckedChanged: ((Boolean) -> Unit)? = null,
-        onActionResult: (ChecklistMenuAction, ChecklistMenuActionResult) -> Unit = { _, _ -> }
+        onActionResult: (ChecklistMenuAction, ChecklistMenuActionResult) -> Unit =
+            onChecklistMenuActionResult
     ): PopupMenu {
         return createChecklistMenu(
             anchor = anchor,
@@ -512,7 +525,13 @@ class MaterialChecklist(
                 manager
             ),
             itemNewRecyclerHolderFactory = ChecklistNewRecyclerHolder.Factory(
-                manager.onCreateNewChecklistItemClicked
+                onItemClicked = manager.onCreateNewChecklistItemClicked,
+                onOptionsClicked = { anchor ->
+                    showChecklistMenu(
+                        anchor = anchor,
+                        onActionResult = onChecklistMenuActionResult
+                    )
+                }
             ),
             itemChipContainerRecyclerHolderFactory = ChipContainerRecyclerHolder.Factory(
                 onItemClicked = { item ->

@@ -32,7 +32,8 @@ import com.dvdb.materialchecklist.util.setTintCompat
 internal class ChecklistNewRecyclerHolder private constructor(
     itemView: View,
     config: ChecklistNewRecyclerHolderConfig,
-    private val onItemClicked: (position: Int) -> Unit
+    private val onItemClicked: (position: Int) -> Unit,
+    private val onOptionsClicked: (anchor: View) -> Unit
 ) : BaseRecyclerHolder<ChecklistNewRecyclerItem, ChecklistNewRecyclerHolderConfig>(
     itemView,
     config
@@ -40,10 +41,12 @@ internal class ChecklistNewRecyclerHolder private constructor(
 
     private val addIcon: ImageView = itemView.findViewById(R.id.item_checklist_new_add)
     private val text: TextView = itemView.findViewById(R.id.item_checklist_new_text)
+    private val optionsIcon: ImageView = itemView.findViewById(R.id.item_checklist_new_options)
 
     init {
         initialiseView()
         initRootListener()
+        initOptionsListener()
     }
 
     override fun bindView(item: ChecklistNewRecyclerItem) {
@@ -57,6 +60,7 @@ internal class ChecklistNewRecyclerHolder private constructor(
         initialiseRoot()
         initialiseAdd()
         initialiseText()
+        initialiseOptions()
     }
 
     private fun initialiseRoot() {
@@ -78,6 +82,14 @@ internal class ChecklistNewRecyclerHolder private constructor(
         addIcon.alpha = config.iconAlphaAdd
     }
 
+    private fun initialiseOptions() {
+        val tintedIcon = config.iconOptions
+        tintedIcon?.setTintCompat(config.iconTintColor)
+        optionsIcon.setImageDrawable(tintedIcon)
+
+        optionsIcon.alpha = config.iconAlphaOptions
+    }
+
     private fun initialiseText() {
         text.text = config.text
         text.setTextSize(TypedValue.COMPLEX_UNIT_PX, config.textSize)
@@ -93,8 +105,13 @@ internal class ChecklistNewRecyclerHolder private constructor(
         itemView.setOnClickListener { onItemClicked(bindingAdapterPosition) }
     }
 
+    private fun initOptionsListener() {
+        optionsIcon.setOnClickListener { onOptionsClicked(optionsIcon) }
+    }
+
     class Factory(
-        private val onItemClicked: (position: Int) -> Unit
+        private val onItemClicked: (position: Int) -> Unit,
+        private val onOptionsClicked: (anchor: View) -> Unit
     ) : BaseRecyclerHolderFactory<ChecklistNewRecyclerItem, ChecklistNewRecyclerHolderConfig> {
 
         override fun create(
@@ -109,7 +126,8 @@ internal class ChecklistNewRecyclerHolder private constructor(
             return ChecklistNewRecyclerHolder(
                 itemView,
                 config,
-                onItemClicked
+                onItemClicked,
+                onOptionsClicked
             )
         }
     }

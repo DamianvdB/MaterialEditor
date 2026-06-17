@@ -38,6 +38,7 @@ dependencies {
     testRuntimeOnly deps.junit.launcher
 
     androidTestImplementation deps.androidx.test_core
+    androidTestImplementation deps.androidx.test_espresso
     androidTestImplementation deps.androidx.test_ext_junit
     androidTestImplementation deps.androidx.test_rules
     androidTestImplementation deps.androidx.test_runner

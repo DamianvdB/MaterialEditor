@@ -70,6 +70,8 @@ internal class ChecklistConfig(
     var iconAlphaDelete: Float = 0.9F,
     private val iconAdd: Drawable? = context.getDrawableCompat(R.drawable.ic_add),
     var iconAlphaAdd: Float = 0.7F,
+    private val iconOptions: Drawable? = context.getDrawableCompat(R.drawable.ic_more_vert_white),
+    var iconAlphaOptions: Float = 0.7F,
 
     /**
      * Checkbox
@@ -205,6 +207,8 @@ internal class ChecklistConfig(
             iconTintColor = iconTintColor,
             iconAdd = iconAdd,
             iconAlphaAdd = iconAlphaAdd,
+            iconOptions = iconOptions,
+            iconAlphaOptions = iconAlphaOptions,
             topAndBottomPadding = itemTopAndBottomPadding,
             leftAndRightPadding = itemLeftAndRightPadding
         ),

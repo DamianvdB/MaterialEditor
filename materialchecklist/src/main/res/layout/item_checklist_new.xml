@@ -32,4 +32,13 @@
         android:paddingBottom="@dimen/mc_spacing_small_medium"
         tools:text="@string/mc_item_checklist_new_text" />
 
+    <ImageView
+        android:id="@+id/item_checklist_new_options"
+        android:layout_width="@dimen/mc_icon_size_large"
+        android:layout_height="@dimen/mc_icon_size_large"
+        android:contentDescription="@string/mc_checklist_menu_options"
+        android:padding="@dimen/mc_spacing_tiny"
+        tools:srcCompat="@drawable/ic_more_vert_white"
+        tools:tint="@color/mc_icon_tint" />
+
 </LinearLayout>

@@ -18,19 +18,69 @@ package com.dvdb.materialchecklist
 
 import android.view.Menu
 import android.view.MenuItem
+import android.widget.ImageView
+import androidx.test.espresso.Espresso.onView
+import androidx.test.espresso.action.ViewActions.click
+import androidx.test.espresso.assertion.ViewAssertions.matches
+import androidx.test.espresso.matcher.ViewMatchers.isDisplayed
+import androidx.test.espresso.matcher.ViewMatchers.withId
+import androidx.test.espresso.matcher.ViewMatchers.withText
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.dvdb.materialchecklist.config.checklist.getOnItemCheckedBehavior
 import com.dvdb.materialchecklist.config.checklist.model.BehaviorCheckedItem
 import com.dvdb.materialchecklist.manager.checklist.model.ChecklistMenuAction
+import org.hamcrest.Matchers.allOf
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Test
 import org.junit.runner.RunWith
+import java.util.concurrent.atomic.AtomicReference
 
 @RunWith(AndroidJUnit4::class)
 class MaterialChecklistPopupMenuInstrumentedTest : MaterialChecklistInstrumentedTestSupport() {
+
+    @Test
+    fun checklistMenuAffordanceIsRenderedFromNewItemRow() {
+        scenarioRule.scenario.onActivity { activity ->
+            val options = activity.requireViewById<ImageView>(R.id.item_checklist_new_options)
+
+            assertEquals(
+                activity.getString(R.string.mc_checklist_menu_options),
+                options.contentDescription.toString()
+            )
+        }
+    }
+
+    @Test
+    fun checklistMenuAffordanceClickDispatchesRegisteredAction() {
+        val selectedAction = AtomicReference<ChecklistMenuAction?>()
+
+        scenarioRule.scenario.onActivity { activity ->
+            activity.checklist.setOnChecklistMenuActionResultListener { action, _ ->
+                selectedAction.set(action)
+            }
+        }
+
+        onView(
+            allOf(
+                withId(R.id.item_checklist_new_options),
+                isDisplayed()
+            )
+        ).perform(click())
+
+        onView(
+            allOf(
+                withText(R.string.mc_checklist_menu_convert_to_text),
+                isDisplayed()
+            )
+        )
+            .check(matches(isDisplayed()))
+            .perform(click())
+
+        assertEquals(ChecklistMenuAction.CONVERT_TO_TEXT, selectedAction.get())
+    }
 
     @Test
     fun checklistMenuDispatchesExistingActions() {
@@ -50,6 +100,24 @@ class MaterialChecklistPopupMenuInstrumentedTest : MaterialChecklistInstrumented
             assertEquals(ChecklistMenuAction.REMOVE_CHECKED_ITEMS, selectedAction)
             assertTrue(checklist.getItems().contains("Alpha"))
             assertFalse(checklist.getItems().contains("Done"))
+        }
+    }
+
+    @Test
+    fun checklistMenuUsesRegisteredActionListenerByDefault() {
+        var selectedAction: ChecklistMenuAction? = null
+
+        scenarioRule.scenario.onActivity { activity ->
+            val checklist = activity.checklist
+            checklist.setOnChecklistMenuActionResultListener { action, _ -> selectedAction = action }
+
+            val popupMenu = checklist.createChecklistMenu(
+                anchor = activity.requireViewById(R.id.item_checklist_new_options)
+            )
+
+            popupMenu.menu.performAction(activity.getString(R.string.mc_checklist_menu_convert_to_text))
+
+            assertEquals(ChecklistMenuAction.CONVERT_TO_TEXT, selectedAction)
         }
     }
 
