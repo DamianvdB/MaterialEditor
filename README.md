@@ -35,7 +35,10 @@ repository without a PGP key:
 
 Output: `build/maintenance-repository/io/github/damianvdb/material-editor/1.0.5/`.
 D Notes can consume it with `-PmaterialEditorRepository=/absolute/path/to/build/maintenance-repository`.
-This is local verification; it does not publish to Maven Central.
+This command is local verification. Version 1.0.5 was published to Maven Central
+on 16 October 2026; the public POM, AAR, sources and Javadoc match the signed
+maintenance artifacts byte for byte. See the
+[Maven Central artifact](https://central.sonatype.com/artifact/io.github.damianvdb/material-editor/1.0.5).
 
 For public publication, configure a Central Portal user token and the existing
 PGP signing credentials outside Git. The `OSSRH_USERNAME`/`OSSRH_PASSWORD`
