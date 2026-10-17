@@ -4,6 +4,6 @@
         <activity
             android:name="com.dvdb.materialchecklist.MaterialChecklistTestActivity"
             android:exported="false"
-            android:theme="@android:style/Theme.Material.Light.NoActionBar" />
+            android:theme="@style/Theme.AppCompat.Light.NoActionBar" />
     </application>
 </manifest>

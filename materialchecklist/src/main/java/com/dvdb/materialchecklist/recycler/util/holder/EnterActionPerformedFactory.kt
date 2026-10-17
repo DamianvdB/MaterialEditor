@@ -30,16 +30,17 @@ internal class EnterActionPerformedFactory {
             return@OnEditorActionListener false
         }
 
+        val isImeAction = actionId == EditorInfo.IME_ACTION_NEXT || actionId == EditorInfo.IME_ACTION_DONE
         if (event == null) {
-            if (actionId != EditorInfo.IME_ACTION_NEXT && actionId != EditorInfo.IME_ACTION_DONE) {
+            if (!isImeAction) return@OnEditorActionListener false
+        } else {
+            if (event.keyCode != KeyEvent.KEYCODE_ENTER || !event.hasNoModifiers()) {
                 return@OnEditorActionListener false
             }
-        } else if (actionId == EditorInfo.IME_NULL || actionId == KeyEvent.KEYCODE_ENTER) {
-            if (event.action != KeyEvent.ACTION_DOWN) {
+            if (actionId != EditorInfo.IME_NULL && !isImeAction) return@OnEditorActionListener false
+            if (event.action != KeyEvent.ACTION_DOWN || event.repeatCount > 0) {
                 return@OnEditorActionListener true
             }
-        } else {
-            return@OnEditorActionListener false
         }
 
         return@OnEditorActionListener runnable()
