@@ -36,7 +36,7 @@ internal fun View.setVisible(
 
 internal fun View.showKeyboard() {
     (context.getSystemService(Context.INPUT_METHOD_SERVICE) as? InputMethodManager)
-        ?.toggleSoftInput(InputMethodManager.SHOW_FORCED, InputMethodManager.HIDE_IMPLICIT_ONLY)
+        ?.showSoftInput(this, InputMethodManager.SHOW_IMPLICIT)
 }
 
 internal fun View.hideKeyboard() {
