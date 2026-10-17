@@ -43,7 +43,8 @@ class MaterialChecklistInsertionInstrumentedTest : MaterialChecklistInstrumented
 
         scenarioRule.scenario.onActivity { activity ->
             val insertedItem = activity.checklist.getChecklistItemAtPosition(1)
-            val checkedItem = activity.checklist.getChecklistItemAtPosition(2)
+            // Adapter position 2 is the add-item row before the checked group.
+            val checkedItem = activity.checklist.getChecklistItemAtPosition(3)
 
             assertEquals("", insertedItem?.text)
             assertFalse(insertedItem?.isChecked ?: true)

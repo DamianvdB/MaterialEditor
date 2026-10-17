@@ -35,11 +35,28 @@ import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Test
+import org.junit.Before
+import android.os.SystemClock
 import org.junit.runner.RunWith
 import java.util.concurrent.atomic.AtomicReference
 
 @RunWith(AndroidJUnit4::class)
 class MaterialChecklistPopupMenuInstrumentedTest : MaterialChecklistInstrumentedTestSupport() {
+
+    @Before fun showChecklistMenuFixture() {
+        // The editor starts empty until its consumer supplies a checklist.
+        scenarioRule.scenario.onActivity { it.checklist.setItems("[ ] First") }
+        val deadline = SystemClock.uptimeMillis() + 5000
+        var shown = false
+        while (!shown && SystemClock.uptimeMillis() < deadline) {
+            scenarioRule.scenario.onActivity { activity ->
+                shown = activity.findViewById<ImageView>(R.id.item_checklist_new_options)?.isShown == true
+            }
+            if (!shown) SystemClock.sleep(16)
+        }
+        assertTrue("The fixture's checklist row must be laid out", shown)
+    }
+
 
     @Test
     fun checklistMenuAffordanceIsRenderedFromNewItemRow() {
